@@ -1,0 +1,109 @@
+@page "/todo"
+@rendermode InteractiveServer
+
+@inject TodoApiClient TodoApi
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo List</h1>
+
+<p>This component demonstrates a simple Todo app using Postgres (database) and Redis (cache).</p>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="What needs to be done?"
+                   @bind="newTodoTitle" @bind:event="oninput"
+                   @onkeyup="HandleKeyUp" />
+            <button class="btn btn-primary" @onclick="AddTodo">
+                Add
+            </button>
+        </div>
+    </div>
+</div>
+
+@if (todos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (todos.Length == 0)
+{
+    <p class="text-muted">No todos yet. Add one above!</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width: 50px;">Done</th>
+                <th>Title</th>
+                <th style="width: 180px;">Created</th>
+                <th style="width: 100px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todo in todos)
+            {
+                <tr class="@(todo.IsComplete ? "text-decoration-line-through text-muted" : "")">
+                    <td>
+                        <input type="checkbox" class="form-check-input"
+                               checked="@todo.IsComplete" @onclick="() => ToggleTodo(todo)" />
+                    </td>
+                    <td>@todo.Title</td>
+                    <td>@todo.CreatedAt.ToString("g")</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTodo(todo.Id)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="text-muted">
+        @todos.Count(t => !t.IsComplete) remaining, @todos.Count(t => t.IsComplete) completed
+    </p>
+}
+
+@code {
+    private TodoItem[]? todos;
+    private string newTodoTitle = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await TodoApi.GetTodosAsync();
+    }
+
+    private async Task AddTodo()
+    {
+        if (string.IsNullOrWhiteSpace(newTodoTitle)) return;
+
+        var created = await TodoApi.CreateTodoAsync(newTodoTitle);
+        if (created != null)
+        {
+            todos = [created, .. (todos ?? [])];
+        }
+        newTodoTitle = string.Empty;
+    }
+
+    private async Task ToggleTodo(TodoItem todo)
+    {
+        await TodoApi.ToggleTodoAsync(todo);
+        todos = await TodoApi.GetTodosAsync();
+    }
+
+    private async Task DeleteTodo(int id)
+    {
+        await TodoApi.DeleteTodoAsync(id);
+        todos = todos?.Where(t => t.Id != id).ToArray();
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddTodo();
+        }
+    }
+}

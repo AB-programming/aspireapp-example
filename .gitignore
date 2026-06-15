@@ -1,0 +1,60 @@
+## .NET / Aspire
+bin/
+obj/
+publish/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## VS Code / Rider / VS
+.vs/
+.vscode/
+.idea/
+*.swp
+
+## NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Test results
+[Tt]est[Rr]esult*/
+[Dd]ebugPS/
+*.trx
+coverage/
+
+## Aspire
+.aspire/modules/
+*.aspire-state
+
+## OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Secrets / environment
+appsettings.*.local.json
+.env
+*.pfx
+*.key
